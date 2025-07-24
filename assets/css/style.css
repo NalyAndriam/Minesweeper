@@ -1,0 +1,130 @@
+@font-face {
+    font-family: 'Pixel';
+    src: url('../fonts/ari_w9500/ari-w9500.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pixel Bold';
+    src: url('../fonts/ari_w9500/ari-w9500-bold.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* index page */
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    font-family: 'Pixel', sans-serif;
+}
+h1 {
+    margin-bottom: 20px;
+    font-family: 'Pixel Bold', sans-serif;
+}
+.options {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+.option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    font-family: 'Pixel', sans-serif;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #45a049;
+}
+
+/* game page */
+
+#game-info {
+    margin-bottom: 10px;
+    font-size: 18px;
+    display: flex;
+    gap: 20px;
+}
+#game-board {
+    display: grid;
+    gap: 1px;
+    background-color: #aaa;
+    padding: 1px;
+}
+.cell {
+    width: 30px;
+    height: 30px;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+}
+.cell.revealed {
+    background-color: #eee;
+    cursor: default;
+}
+.cell.mine {
+    background-color: red;
+}
+.cell.flag {
+    background-color: yellow;
+}
+#game-over-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+#game-over-popup button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#game-over-popup button:hover {
+    background-color: #45a049;
+}
+.home-link {
+    margin-top: 10px;
+    text-align: center;
+}
+.home-link a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-size: 16px;
+}
+.home-link a:hover {
+    text-decoration: underline;
+}

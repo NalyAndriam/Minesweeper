@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper</title>
+    <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div id="game-info">
+        <span id="flags-remaining">Mines remaining: 10</span>
+        <span id="timer">Time: 0s</span>
+    </div>
+    <div id="game-board"></div>
+    <div class="home-link">
+        <a href="index.html">Back to Home</a>
+    </div>
+    <div id="game-over-popup">
+        <h2>Game Over!</h2>
+        <button onclick="restartGame()">Restart</button>
+        <button onclick="goToIndex()">Back to Home</button>
+    </div>
+    <script src="assets/js/game.js"></script>
+
+</body>
+</html>
