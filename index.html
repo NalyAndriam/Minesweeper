@@ -10,16 +10,22 @@
     <h1>Minesweeper - Choose Grid Size</h1>
     <div class="options">
         <div class="option">
-            <button onclick="startGame(8, 8, 8)">Small (8x8, 8 mines)</button>
+            <button onclick="startGame(8, 8, 8, 'single')">Small (8x8, 8 mines)</button>
         </div>
         <div class="option">
-
-            <button onclick="startGame(10, 10, 10)">Medium (10x10, 10 mines)</button>
+            <button onclick="startGame(10, 10, 10, 'single')">Medium (10x10, 10 mines)</button>
         </div>
         <div class="option">
-            <button onclick="startGame(12, 12, 12)">Large (12x12, 12 mines)</button>
+            <button onclick="startGame(12, 12, 12, 'single')">Large (12x12, 12 mines)</button>
+        </div>
+        <div class="option">
+            <button onclick="startGame(10, 10, 10, 'two')">Two Players (10x10, 10 mines)</button>
         </div>
     </div>
-    <script src="assets/js/game.js"></script>
+    <script>
+        function startGame(rows, cols, mines, mode) {
+            window.location.href = `game.html?rows=${rows}&cols=${cols}&mines=${mines}&mode=${mode}`;
+        }
+    </script>
 </body>
 </html>

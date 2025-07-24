@@ -1,11 +1,8 @@
-function startGame(rows, cols, mines) {
-    window.location.href = `game.html?rows=${rows}&cols=${cols}&mines=${mines}`;
-}
-
 const urlParams = new URLSearchParams(window.location.search);
 const ROWS = parseInt(urlParams.get('rows')) || 10;
 const COLS = parseInt(urlParams.get('cols')) || 10;
 const MINES = parseInt(urlParams.get('mines')) || 10;
+const MODE = urlParams.get('mode') || 'single';
 let board = [];
 let revealed = [];
 let flags = [];
@@ -13,12 +10,24 @@ let flagCount = 0;
 let timer = 0;
 let timerInterval = null;
 let gameStarted = false;
+let currentPlayer = 1;
+let player1Score = 0;
+let player2Score = 0;
+let turnTimer = 0;
+let turnTimerInterval = null;
+const TURN_DURATION = 24;
 
 function initializeBoard() {
     board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
     revealed = Array(ROWS).fill().map(() => Array(COLS).fill(false));
     flags = Array(ROWS).fill().map(() => Array(COLS).fill(false));
     flagCount = 0;
+    player1Score = 0;
+    player2Score = 0;
+    currentPlayer = 1;
+    turnTimer = TURN_DURATION;
+    updatePlayerScores();
+    updateTurnTimer();
     updateFlagsDisplay();
 
     let minePositions = [];
@@ -92,32 +101,134 @@ function stopTimer() {
     }
 }
 
+function startTurnTimer() {
+    if (MODE === 'two' && !turnTimerInterval) {
+        turnTimer = TURN_DURATION;
+        updateTurnTimer();
+        turnTimerInterval = setInterval(() => {
+            turnTimer--;
+            updateTurnTimer();
+            if (turnTimer <= 0) {
+                switchPlayer();
+            }
+        }, 1000);
+    }
+}
+
+function stopTurnTimer() {
+    if (turnTimerInterval) {
+        clearInterval(turnTimerInterval);
+        turnTimerInterval = null;
+    }
+}
+
+function updatePlayerScores() {
+    const player1ScoreElement = document.getElementById('player1-score');
+    const player2ScoreElement = document.getElementById('player2-score');
+    player1ScoreElement.textContent = `Player 1: ${player1Score}`;
+    player2ScoreElement.textContent = `Player 2: ${player2Score}`;
+    if (MODE === 'two') {
+        if (currentPlayer === 1) {
+            player1ScoreElement.classList.add('active-player');
+            player2ScoreElement.classList.remove('active-player');
+        } else {
+            player1ScoreElement.classList.remove('active-player');
+            player2ScoreElement.classList.add('active-player');
+        }
+    } else {
+        player1ScoreElement.classList.remove('active-player');
+        player2ScoreElement.classList.remove('active-player');
+        player1ScoreElement.textContent = '';
+        player2ScoreElement.textContent = '';
+    }
+}
+
+function updateTurnTimer() {
+    if (MODE === 'two') {
+        document.getElementById('turn-timer').textContent = `Turn Time: ${turnTimer}s`;
+    } else {
+        document.getElementById('turn-timer').textContent = '';
+    }
+}
+
 function updateFlagsDisplay() {
     document.getElementById('flags-remaining').textContent = `Mines remaining: ${MINES - flagCount}`;
 }
 
+function switchPlayer() {
+    currentPlayer = currentPlayer === 1 ? 2 : 1;
+    turnTimer = TURN_DURATION;
+    updatePlayerScores();
+    updateTurnTimer();
+    stopTurnTimer();
+    startTurnTimer();
+}
+
 function handleClick(x, y) {
-    startTimer();
     if (flags[x][y] || revealed[x][y]) return;
+    startTimer();
+    startTurnTimer();
     revealed[x][y] = true;
     if (board[x][y] === 'M') {
-        showGameOver();
-        revealAllMines();
+        if (MODE === 'two') {
+            if (currentPlayer === 1) {
+                player1Score -= 10;
+            } else {
+                player2Score -= 10;
+            }
+            updatePlayerScores();
+            switchPlayer();
+        } else {
+            showGameOver();
+            revealAllMines();
+        }
     } else {
+        if (MODE === 'two') {
+            if (currentPlayer === 1) {
+                player1Score += 3;
+            } else {
+                player2Score += 3;
+            }
+            updatePlayerScores();
+            switchPlayer();
+        }
         if (board[x][y] === 0) revealEmpty(x, y);
-        checkWin();
+        if (MODE === 'single') checkWin();
     }
     renderBoard();
 }
 
 function handleRightClick(x, y) {
     if (revealed[x][y]) return;
+    startTimer();
+    startTurnTimer();
     if (!flags[x][y]) {
         flags[x][y] = true;
         flagCount++;
+        if (MODE === 'two') {
+            if (board[x][y] === 'M') {
+                if (currentPlayer === 1) {
+                    player1Score += 10;
+                } else {
+                    player2Score += 10;
+                }
+            } else {
+                if (currentPlayer === 1) {
+                    player1Score += 1;
+                } else {
+                    player2Score += 1;
+                }
+            }
+            updatePlayerScores();
+            switchPlayer();
+            checkWin();
+        }
     } else {
         flags[x][y] = false;
         flagCount--;
+        if (MODE === 'two') {
+            switchPlayer();
+        }
     }
     updateFlagsDisplay();
     renderBoard();
@@ -145,32 +256,51 @@ function revealAllMines() {
 }
 
 function checkWin() {
-    let unrevealedNonMines = 0;
-    for (let x = 0; x < ROWS; x++) {
-        for (let y = 0; y < COLS; y++) {
-            if (!revealed[x][y] && board[x][y] !== 'M') unrevealedNonMines++;
+    if (MODE === 'two') {
+        let allMinesFlagged = true;
+        for (let x = 0; x < ROWS; x++) {
+            for (let y = 0; y < COLS; y++) {
+                if (board[x][y] === 'M' && !flags[x][y]) {
+                    allMinesFlagged = false;
+                    break;
+                }
+            }
         }
-    }
-    if (unrevealedNonMines === 0) {
-        showGameOver(true);
+        if (allMinesFlagged) {
+            showGameOver(true);
+        }
+    } else {
+        let unrevealedNonMines = 0;
+        for (let x = 0; x < ROWS; x++) {
+            for (let y = 0; y < COLS; y++) {
+                if (!revealed[x][y] && board[x][y] !== 'M') unrevealedNonMines++;
+            }
+        }
+        if (unrevealedNonMines === 0) {
+            showGameOver(true);
+        }
     }
 }
 
 function showGameOver(win = false) {
     stopTimer();
+    stopTurnTimer();
     const popup = document.getElementById('game-over-popup');
+    let message = win && MODE === 'two' ? `Player ${player1Score > player2Score ? 1 : 2} Wins!` : win ? 'You Win!' : 'Game Over!';
     popup.innerHTML = `
-                <h2>${win ? 'You Win!' : 'Game Over!'}</h2>
-                <p>Time: ${timer}s</p>
-                <button onclick="restartGame()">Restart</button>
-                <button onclick="goToIndex()">Back to Home</button>
-            `;
+        <h2>${message}</h2>
+        ${MODE === 'two' ? `<p>Player 1: ${player1Score} | Player 2: ${player2Score}</p>` : ''}
+        <p>Time: ${timer}s</p>
+        <button onclick="restartGame()">Restart</button>
+        <button onclick="goToIndex()">Back to Home</button>
+    `;
     popup.style.display = 'block';
     document.getElementById('game-board').style.pointerEvents = 'none';
 }
 
 function restartGame() {
     stopTimer();
+    stopTurnTimer();
     gameStarted = false;
     timer = 0;
     document.getElementById('timer').textContent = `Time: 0s`;
